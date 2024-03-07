@@ -8,6 +8,7 @@ patches:
 - path: patches/deployments.yaml
   target:
     kind: Deployment
+    labelSelector: "app.kubernetes.io/component!=postgresql"
 - path: patches/deployments-springboot.yaml
   target:
     kind: Deployment

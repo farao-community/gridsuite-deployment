@@ -8,11 +8,11 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
 powsybl-ws:
-  environment: 
+  environment: dev_
 
   # Postgres database prefix
   database:
-    host: 10.0.0.5
+    host: gridcapa-postgresql
     databaseOrSchema:
       prefix: ${powsybl-ws.environment:}
 

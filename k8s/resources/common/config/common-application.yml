@@ -8,7 +8,7 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
 powsybl-ws:
-  environment:
+  environment: dev_
 
   # Postgres database prefix
   database:

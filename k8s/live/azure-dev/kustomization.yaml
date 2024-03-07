@@ -8,6 +8,12 @@ components:
   - ../../components/gridsuite
   - ../../components/azure
 
+resources:
+  - postgresql-pv-claim.yaml
+  - postgresql-service.yaml
+  - postgresql-deployment.yaml
+  - postgresql-configmap.yaml
+
 configMapGenerator:
   - name: gridapps-env-configmap
     files:

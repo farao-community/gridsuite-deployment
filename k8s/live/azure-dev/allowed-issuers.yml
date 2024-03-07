@@ -1,1 +1,1 @@
-allowed-issuers: https://login.microsoftonline.com/, https://demo.gridsuite.org/apps-metadata
+allowed-issuers: https://auth-tmp.farao-community.com/realms/GridCapa, https://gridcapa-dev-tmp.farao-community.com/apps-metadata

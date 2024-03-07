@@ -1,4 +1,4 @@
 {
-  "jwks_uri": "https://demo.gridsuite.org/apps-metadata/keys",
-  "issuer": "https://demo.gridsuite.org/apps-metadata"
+  "jwks_uri": "https://gridcapa-dev-tmp.farao-community.com/apps-metadata/keys",
+  "issuer": "https://gridcapa-dev-tmp.farao-community.com/apps-metadata"
 }

@@ -1,0 +1,36 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gridcapa-postgresql-configmap
+  labels:
+    app: gridcapa
+    component: postgresql
+data:
+  init.sh: |-
+    #!/bin/bash
+
+    psql << EOF
+      create database "dev_ds";
+      create database "dev_directory";
+      create database "dev_study";
+      create database "dev_actions";
+      create database "dev_networkmodifications";
+      create database "dev_merge_orchestrator";
+      create database "dev_dynamicmappings";
+      create database "dev_filters";
+      create database "dev_report";
+      create database "dev_config";
+      create database "dev_sa";
+      create database "dev_geo_data";
+      create database "dev_cgmes_boundary";
+      create database "dev_iidm";
+      create database "dev_import_history";
+      create database "dev_cgmes_assembling";
+      create database "dev_useradmin";
+      create database "dev_sensitivityanalysis";
+      create database "dev_shortcircuit";
+      create database "dev_case_metadata";
+      create database "dev_timeseries";
+      create database "dev_voltageinit";
+      create database "dev_loadflow";
+    EOF
