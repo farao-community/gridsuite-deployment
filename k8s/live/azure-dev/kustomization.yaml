@@ -13,6 +13,10 @@ resources:
   - postgresql-service.yaml
   - postgresql-deployment.yaml
   - postgresql-configmap.yaml
+  - rabbitmq-configmap.yaml
+  - rabbitmq-service.yaml
+  - rabbitmq-statefulset.yaml
+  - elasticsearch.yaml
 
 configMapGenerator:
   - name: gridapps-env-configmap
@@ -55,6 +59,20 @@ configMapGenerator:
     behavior: merge
     files:
       - config.yml=loadflow-server-config.yml
+  - name: elasticsearch.yml
+    files:
+      - elastic_config/elasticsearch.yml
+  - name: jvm.options
+    files:
+      - elastic_config/jvm.options
+  - name: log4j2.properties
+    files:
+      - elastic_config/log4j2.properties
+  - name: tmpdir
+    literals:
+      - tmpdir=/tmp
+
+
 
 # Patch ingress host
 patchesJson6902:
