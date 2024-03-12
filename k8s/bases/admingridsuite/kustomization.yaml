@@ -3,4 +3,4 @@ kind: Kustomization
 
 bases:
   - ../gridsuite
-  - ../../resources/admin
+#  - ../../resources/admin

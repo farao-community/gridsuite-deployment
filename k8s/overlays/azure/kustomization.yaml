@@ -20,4 +20,4 @@ configMapGenerator:
 
 patchesStrategicMerge:
 - limit-gridexplore-cases.yaml
-- fluentd-containerd.yaml # default fluentd parse is for docker, on azure we use containerd
+#- fluentd-containerd.yaml # default fluentd parse is for docker, on azure we use containerd
