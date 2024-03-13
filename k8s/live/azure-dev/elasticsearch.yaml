@@ -39,7 +39,7 @@ spec:
               mountPath: /tmp
       containers:
       - name: main
-        image: docker.io/bitnami/elasticsearch:8.7.1
+        image: docker.io/bitnami/elasticsearch:7.9.3
         imagePullPolicy: IfNotPresent
         env:
           - name: ES_TMPDIR
@@ -72,7 +72,7 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           tcpSocket:
-            port: 9300
+            port: 9200
           timeoutSeconds: 5
 
 
@@ -86,19 +86,19 @@ spec:
         securityContext:
           privileged: true
         ports:
-          - containerPort: 9300
+          - containerPort: 9200
             name: transport
             protocol: TCP
         volumeMounts:
           - name: elasticsearch-yml
             subPath: elasticsearch.yml
-            mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+            mountPath: /opt/bitnami/elasticsearch/config/elasticsearch.yml
           - name: jvm-options
             subPath: jvm.options
             mountPath: /usr/share/elasticsearch/config/jvm.options.d/jvm.options
           - name: log4j2-properties
             subPath: log4j2.properties
-            mountPath: /usr/share/elasticsearch/config/log4j2.properties
+            mountPath: /opt/bitnami/elasticsearch/config/log4j2.properties
           - name: storage
             mountPath: /usr/share/elasticsearch/data
           - name: tmp
@@ -130,12 +130,13 @@ metadata:
 spec:
   ports:
     - name: transport
-      port: 9300
+      port: 9200
       protocol: TCP
-      targetPort: 9300
+      targetPort: 9200
   selector:
     app: elasticsearch
     role: master
   publishNotReadyAddresses: true
   sessionAffinity: None
   type: ClusterIP
+
