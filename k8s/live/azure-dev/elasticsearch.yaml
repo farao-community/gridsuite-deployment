@@ -128,15 +128,12 @@ metadata:
   labels:
     role: master
 spec:
+  type: ClusterIP
   ports:
-    - name: transport
+    - name: http
       port: 9200
       protocol: TCP
-      targetPort: 9200
   selector:
     app: elasticsearch
     role: master
-  publishNotReadyAddresses: true
-  sessionAffinity: None
-  type: ClusterIP
 
