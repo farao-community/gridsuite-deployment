@@ -1,34 +1,27 @@
 # PATH SETTINGS
 path:
   logs: /opt/bitnami/elasticsearch/logs
-  data: /usr/share/elasticsearch/data
-
-# NODE NAME
-# Already defined in the environment variable
+  data: /bitnami/elasticsearch/data
 
 # NETWORK HOST
-network.host: 0.0.0.0
-http.port: 9200
-http.host: 0.0.0.0
+network:
+  bind_host: 0.0.0.0
+http:
+  port: 9200
+transport:
+  tcp:
+    port: 9300
+#http.host: 0.0.0.0
 # CLUSTER NAME
 cluster:
   name: elasticsearch
 #  initial_master_nodes:
 #    - elasticsearch-0.elasticsearch-master
-# HEAP SIZE
-# See jvm.options file
-
-# JVM HEAP DUMP PATH
-# See jvm.options file
-
-# GC LOGGING
-# See jvm.options file
-
-# TEMP DIRECTORY
-# Already defined in the environment variable
-
-#SECURITY
-#xpack.security.enabled: false
+#
+##SECURITY
+#xpack:
+#  security:
+#    enabled: false
 
 # DISCOVERY SETTINGS
 discovery:
@@ -36,8 +29,7 @@ discovery:
   seed_hosts:
     - elasticsearch
 
-#
-#ingest:
-#  geoip:
-#    downloader:
-#      enabled: false
+node:
+  name: elasticsearch-0
+  master: true
+  data: true
