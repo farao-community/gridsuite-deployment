@@ -8,9 +8,9 @@ network:
   bind_host: 0.0.0.0
 http:
   port: 9200
-transport:
-  tcp:
-    port: 9300
+#transport:
+#  tcp:
+#    port: 9300
 #http.host: 0.0.0.0
 # CLUSTER NAME
 cluster:
@@ -19,17 +19,18 @@ cluster:
 #    - elasticsearch-0.elasticsearch-master
 #
 ##SECURITY
-#xpack:
-#  security:
-#    enabled: false
-
+xpack:
+  security:
+    enabled: false
+  ml:
+    enabled: false
 # DISCOVERY SETTINGS
 discovery:
   type: single-node
   seed_hosts:
     - elasticsearch
 
-node:
-  name: elasticsearch-0
-  master: true
-  data: true
+#node:
+#  name: elasticsearch-0
+#  master: true
+#  data: true

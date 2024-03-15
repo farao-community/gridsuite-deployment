@@ -5,7 +5,6 @@ metadata:
   labels:
     app: gridcapa
     component: elasticsearch
-    app.kubernetes.io/component: postgresql
 spec:
   serviceName: elasticsearch
   selector:
@@ -39,7 +38,7 @@ spec:
               mountPath: /tmp
       containers:
       - name: main
-        image: docker.io/bitnami/elasticsearch:7.9.3
+        image: docker.io/bitnami/elasticsearch:8.7.1
         imagePullPolicy: IfNotPresent
         env:
           - name: ES_TMPDIR
@@ -126,14 +125,15 @@ kind: Service
 metadata:
   name: elasticsearch
   labels:
-    role: master
+    app: gridcapa
+    component: elasticsearch
 spec:
   type: ClusterIP
   ports:
-    - name: http
+    - name: transport
       port: 9200
       protocol: TCP
   selector:
-    app: elasticsearch
-    role: master
+    app: gridcapa
+    component: elasticsearch
 
