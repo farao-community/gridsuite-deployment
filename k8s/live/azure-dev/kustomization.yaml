@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-bases:
+resources:
   - ../../overlays/azure
 
 components:
@@ -25,9 +25,6 @@ configMapGenerator:
   - name: gridstudy-app-configmap
     files:
       - idpSettings.json=gridstudy-app-idpSettings.json
-  - name: gridmerge-app-configmap
-    files:
-      - idpSettings.json=gridmerge-app-idpSettings.json
   - name: gridexplore-app-configmap
     files:
       - idpSettings.json=gridexplore-app-idpSettings.json
@@ -42,7 +39,6 @@ configMapGenerator:
     files:
       - openid-configuration
       - keys
-      - authentication.json
   - name: apps-metadata-server-httpdconf-configmap
     behavior: replace
     files:
@@ -55,6 +51,10 @@ configMapGenerator:
     behavior: merge
     files:
       - application.yml=common-application.yml
+  - name: user-admin-server-configmap-specific
+    behavior: merge
+    files:
+      - application.yml=config/user-admin-server-application.yml
   - name: loadflow-server-itools-configmap
     behavior: merge
     files:
@@ -71,11 +71,14 @@ configMapGenerator:
   - name: tmpdir
     literals:
       - tmpdir=/tmp
-
+  - name: security-analysis-server-itools-configmap
+    behavior: merge
+    files:
+      - config.yml=security-analysis-server-config.yml
 
 
 # Patch ingress host
-patchesJson6902:
+patches:
   - target:
       group: networking.k8s.io
       version: v1
@@ -99,18 +102,6 @@ patchesJson6902:
       version: v1
       kind: Ingress
       name: gridstudy-app-ingress
-    path: patch_ingress.yaml
-  - target:
-      group: networking.k8s.io
-      version: v1
-      kind: Ingress
-      name: gridmerge-app-ingress
-    path: patch_tls_ingress.yaml
-  - target:
-      group: networking.k8s.io
-      version: v1
-      kind: Ingress
-      name: gridmerge-app-ingress
     path: patch_ingress.yaml
   - target:
       group: networking.k8s.io
@@ -166,3 +157,4 @@ patchesJson6902:
       kind: Ingress
       name: gridadmin-app-ingress
     path: patch_ingress.yaml
+

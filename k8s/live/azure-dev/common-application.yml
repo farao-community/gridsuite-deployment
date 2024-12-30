@@ -1,11 +1,15 @@
 spring:
-  data:
-    elasticsearch:
-      username: ${ELASTICSEARCH_USER:#{null}}
-      password: ${ELASTICSEARCH_PASSWORD:#{null}}
+  elasticsearch:
+    username: ${ELASTICSEARCH_USER:#{null}}
+    password: ${ELASTICSEARCH_PASSWORD:#{null}}
+    uris:
+      - http://elasticsearch:9201
+      - http://elasticsearch:9202
   rabbitmq:
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+    addresses: rabbitmq:5673,rabbitmq:5674,rabbitmq:5675
+    address-shuffle-mode: random
 
 powsybl-ws:
   environment: dev_

@@ -31,6 +31,8 @@ resources:
   - security-analysis-server-service.yaml
   - dynamic-simulation-server-deployment.yaml
   - dynamic-simulation-server-service.yaml
+  - dynamic-security-analysis-server-deployment.yaml
+  - dynamic-security-analysis-server-service.yaml
   - directory-server-deployment.yaml
   - directory-server-service.yaml
   - explore-server-deployment.yaml
@@ -82,11 +84,9 @@ configMapGenerator:
   - name: dynamic-simulation-server-configmap-specific
     files:
       - application.yml=config/dynamic-simulation-server-application.yml
-  - name: dynawo-config-configmap
+  - name: dynamic-security-analysis-server-configmap-specific
     files:
-      - models.par=config/dynamic-simulation/models.par
-      - network.par=config/dynamic-simulation/network.par
-      - solvers.par=config/dynamic-simulation/solvers.par
+      - application.yml=config/dynamic-security-analysis-server-application.yml
   - name: dynawo-itools-configmap
     files:
       - config.yml=config/dynawo-itools-config.yml
