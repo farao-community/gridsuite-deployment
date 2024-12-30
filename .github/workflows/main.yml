@@ -4,12 +4,12 @@ on:
   push:
   repository_dispatch:
     types:
-      - case_updated
-      - cgmes_gl_updated
+      - case_server_updated
+      - cgmes_gl_server_updated
       - geo_data_updated
       - network_conversion_server_updated
       - network_map_server_updated
-      - network_store_updated
+      - network_store_server_updated
       - single_line_diagram_server_updated
       - gridstudy_app_updated
       - study_server_updated
@@ -17,40 +17,43 @@ on:
       - network_modification_server_updated
       - gateway_updated
       - loadflow_server_updated
-      - case_import_job_updated
-      - notification_server_updated
-      - merge_orchestrator_server_updated
-      - merge_notification_server_updated
-      - cgmes_boundary_server_updated
-      - cgmes_assembling_job_updated
-      - gridmerge_app_updated
-      - gridactions_app_updated
+      - study_notification_server_updated
       - actions_server_updated
       - security_analysis_server_updated
       - config_server_updated
       - config_notification_server_updated
-      - cgmes_boundary_import_job_updated
       - filter_server_updated
-      - balances_adjustment_server_updated
       - case_validation_server_updated
       - directory_server_updated
       - dynamic_simulation_server_updated
+      - dynamic_security_analysis_server_updated
       - report_server_updated
       - gridexplore_app_updated
       - directory-notification_server_updated
-
+      - explore_server_updated
+      - dynamic_mapping_server_updated
+      - griddyna_app_updated
+      - sensitivity_analysis_server_updated
+      - user_admin_server_updated
+      - user_identity_oidc_replication_server_updated
+      - shortcircuit_server_updated
+      - timeseries_server_updated
+      - voltage_init_server_updated
+      - case_import_server_updated
+      - gridadmin_app_updated
+      - study_config_server_updated
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3.1
 
       - name: Set up python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: '3.7'
 
@@ -58,7 +61,7 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml requests
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
 
@@ -68,7 +71,7 @@ jobs:
           BASTION_KEY: ${{secrets.BASTION_KEY}}
 
       - name: Deploy to Azure
-        run: kubectl kustomize k8s/overlays/azure-dev | python .github/scripts/image-tag-to-digest.py | ssh -o "StrictHostKeyChecking no" -i key ${{ secrets.BASTION_LOGIN }}@${{ secrets.BASTION_HOST }} kubectl apply -f -
+        run: kubectl kustomize k8s/live/azure-dev | python .github/scripts/image-tag-to-digest.py | ssh -o "StrictHostKeyChecking no" -i key ${{ secrets.BASTION_LOGIN }}@${{ secrets.BASTION_HOST }} kubectl apply -f -
 
       - name: Delete key
         run: rm key

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-notification-server
+  labels:
+    name: config-notification-server
+    version: "1"
+    app.kubernetes.io/component: gridsuite-springboot
+    gridsuite.org/springboot-with-rabbitmq: "true"
+  annotations:
+    gridsuite.org/size: springboot-xxs
+spec:
+  selector:
+    matchLabels:
+      name: config-notification-server
+  template:
+    metadata:
+      labels:
+        name: config-notification-server
+    spec:
+      containers:
+      - name: main
+        image: docker.io/gridsuite/config-notification-server:latest
+        volumeMounts:
+        - mountPath: /config/specific
+          name: config-notification-server-configmap-specific-volume
+      volumes:
+        - name: config-notification-server-configmap-specific-volume
+          configMap:
+            name: config-notification-server-configmap-specific

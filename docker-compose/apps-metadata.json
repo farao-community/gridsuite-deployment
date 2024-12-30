@@ -2,32 +2,93 @@
 {
   "name" : "Explore",
   "url"  : "http://localhost:80",
-  "appColor" : "#33AFED"
+  "appColor" : "#33AFED",
+  "hiddenInAppsMenu" : false,
+  "hiddenUserInformation": false
 },
 {
   "name" : "Study",
   "url"  : "http://localhost:84",
   "appColor" : "#0CA789",
+  "hiddenInAppsMenu" : true,
+  "hiddenUserInformation": false,
   "resources" : [
     {
       "types" : ["STUDY"],
       "path" : "/studies/{elementUuid}"
     }
-  ]
+  ],
+  "favoriteCountries": ["DE", "BE", "ES", "FR", "IT", "LU", "GB", "CH"],
+  "defaultCountry": "FR",
+  "predefinedEquipmentProperties" : {
+    "substation" : {
+      "region" : ["east", "south", "west", "north"],
+      "tso" : [ "rtefrance", "elia", "energinet", "energinet",
+        "tennetDE", "transnetbw", "creosnet", "amprion", "50hertz",
+        "tennetNL", "swissgrid", "terna", "apg", "eles",
+        "ceps", "pse", "ree", "ren", "nationalgrid",
+        "eirgrid", "soni", "ost", "nosbih", "eso",
+        "Belenergo", "admie", "hops", "mavir", "litgrid",
+        "ast", "elering", "fingrid", "svk", "statnett",
+        "Landsnet", "cges", "mepso", "transelectrica", "ems",
+        "kostt", "sepsas", "teias", "ukrenergo" ],
+      "totallyFree" : []
+    },
+    "load":  {
+      "codeOI": []
+    },
+    "generator":{
+      "codeOI": [],
+      "genreCvg": ["AUTRE","BIOMASSE","CCG","CHARBON", "COGENERATION",
+      "COMPENSATEUR_SYNCHRONE","COMPENSATEUR_SYNCHRONE_VIMP", "DIESEL",
+      "EJP", "EOLIEN", "EOLIEN_OFFSHORE", "FICTIF", "FIL_DE_L_EAU", "FUEL", "GAZ",
+      "HYDROLIENNE", "NUCLEAIRE", "PILE_A_COMBUSTIBLE", "PHOTOVOLTAIQUE", "PHOTOVOLTAIQUE_DIFFUS",
+      "PHOTOVOLTAIQUE_PLUS_STOCKAGE", "POMPAGE", "POWER_TO_GAS", "SOLAIRE_THERMIQUE", "STEP",
+      "STOCKAGE_BARRAGE", "TAC", "TURBINAGE"
+    ],
+      "categorieENTSOE": []
+    },
+    "line":  {
+      "codeOI": []
+    },
+    "twt":  {
+      "codeOI": []
+    },
+    "battery":  {
+      "codeOI": []
+    },
+    "shuntCompensator":  {
+      "codeOI": []
+    },
+    "voltageLevel":  {
+      "codeOI": []
+    }
+  },
+  "defaultParametersValues": {
+    "fluxConvention": "target",
+    "enableDeveloperMode": "true",
+    "mapManualRefresh": "false"
+  }
 },
 {
   "name" : "Merge",
   "url"  : "http://localhost:81",
-  "appColor" : "#2D9BF0"
-},
-{
-  "name" : "Actions",
-  "url"  : "http://localhost:82",
-  "appColor" : "#DA0063"
+  "appColor" : "#2D9BF0",
+  "hiddenInAppsMenu" : false,
+  "hiddenUserInformation": false
 },
 {
   "name" : "Dynamic Mapping",
   "url"  : "http://localhost:83",
-  "appColor" : "#FFC11B"
+  "appColor" : "#FFC11B",
+  "hiddenInAppsMenu" : false,
+  "hiddenUserInformation": false
+},
+{
+  "name" : "Admin",
+  "url"  : "http://localhost:82",
+  "appColor" : "#FD3745",
+  "hiddenInAppsMenu" : true,
+  "hiddenUserInformation": false
 }
 ]

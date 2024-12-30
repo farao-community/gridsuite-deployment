@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-modification-server
+  labels:
+    name: network-modification-server
+    version: "1"
+    app.kubernetes.io/component: gridsuite-springboot
+    gridsuite.org/springboot-with-database: "true"
+    gridsuite.org/springboot-with-elasticsearch: "true"
+    gridsuite.org/springboot-with-rabbitmq: "true"
+  annotations:
+    gridsuite.org/size: springboot-xl
+spec:
+  selector:
+    matchLabels:
+      name: network-modification-server
+  template:
+    metadata:
+      labels:
+        name: network-modification-server
+    spec:
+      containers:
+      - name: main
+        image: docker.io/gridsuite/network-modification-server:latest
+        volumeMounts:
+        - mountPath: /config/specific
+          name: network-modification-server-configmap-specific-volume
+      volumes:
+        - name: network-modification-server-configmap-specific-volume
+          configMap:
+            name: network-modification-server-configmap-specific

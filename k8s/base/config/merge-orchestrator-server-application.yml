@@ -1,8 +1,0 @@
-parameters:
-  tsos: BE,NL
-  process: TEST
-
-logging:
-  level:
-    org.gridsuite.merge.orchestrator.server.input-broker-messages: DEBUG
-

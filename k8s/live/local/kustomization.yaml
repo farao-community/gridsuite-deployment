@@ -1,0 +1,76 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+components:
+  - ../../components/gridsuite
+
+resources:
+  - ../../bases/admingridsuite
+  - oidc-mock-server-deployment.yaml
+  - oidc-mock-server-ingress.yaml
+  - oidc-mock-server-service.yaml
+  - case-server-ingress.yaml
+  - cgmes-gl-server-ingress.yaml
+  - geo-data-server-ingress.yaml
+  - network-conversion-server-ingress.yaml
+  - network-map-server-ingress.yaml
+  - network-store-server-ingress.yaml
+  - odre-server-ingress.yaml
+  - single-line-diagram-server-ingress.yaml
+  - network-modification-server-ingress.yaml
+  - study-server-ingress.yaml
+  - gateway-ingress.yaml
+  - loadflow-server-ingress.yaml
+  - study-notification-server-ingress.yaml
+  - actions-server-ingress.yaml
+  - filter-server-ingress.yaml
+  - report-server-ingress.yaml
+  - security-analysis-server-ingress.yaml
+  - config-server-ingress.yaml
+  - config-notification-server-ingress.yaml
+  - dynamic-simulation-server-ingress.yaml
+  - dynamic-security-analysis-server-ingress.yaml
+  - directory-server-ingress.yaml
+  - explore-server-ingress.yaml
+  - external-postgres-service.yaml
+  - external-rabbitmq-service.yaml
+  - external-elasticsearch-service.yaml
+  - external-kibana-service.yaml
+  - dynamic-mapping-server-ingress.yaml
+  - user-admin-server-ingress.yaml
+  - user-identity-server-ingress.yaml
+  - sensitivity-analysis-server-ingress.yaml
+  - shortcircuit-server-ingress.yaml
+  - timeseries-server-ingress.yaml
+  - voltage-init-server-ingress.yaml
+  - study-config-server-ingress.yaml
+
+configMapGenerator:
+  - name: gridapps-env-configmap
+    files:
+      - env.json
+  - name: gridstudy-app-configmap
+    files:
+      - idpSettings.json=gridstudy-app-idpSettings.json
+  - name: gridexplore-app-configmap
+    files:
+      - idpSettings.json=gridexplore-app-idpSettings.json
+  - name: gateway-configmap
+    files:
+      - allowed-issuers.yml
+  - name: griddyna-app-configmap
+    files:
+      - idpSettings.json=griddyna-app-idpSettings.json
+  - name: gridadmin-app-configmap
+    files:
+      - idpSettings.json=gridadmin-app-idpSettings.json
+  - name: common-application-configmap
+    behavior: merge
+    files:
+      - application.yml=common-application.yml
+
+patches:
+  - path: patches/ingresses.yaml
+    target:
+      kind: Ingress
+

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-analysis-server
+  labels:
+    name: security-analysis-server
+    version: "1"
+    app.kubernetes.io/component: gridsuite-springboot
+    gridsuite.org/springboot-with-database: "true"
+    gridsuite.org/springboot-with-rabbitmq: "true"
+  annotations:
+    gridsuite.org/size: springboot-xxxl-forking
+spec:
+  selector:
+    matchLabels:
+      name: security-analysis-server
+  template:
+    metadata:
+      labels:
+        name: security-analysis-server
+    spec:
+      containers:
+        - name: main
+          image: docker.io/gridsuite/security-analysis-server:latest
+          volumeMounts:
+            - mountPath: /config/specific
+              name: security-analysis-server-configmap-specific-volume
+            - mountPath: /home/powsybl/.itools
+              name: security-analysis-server-itools-configmap-volume
+      volumes:
+        - name: security-analysis-server-configmap-specific-volume
+          configMap:
+            name: security-analysis-server-configmap-specific
+        - name: security-analysis-server-itools-configmap-volume
+          configMap:
+            name: security-analysis-server-itools-configmap

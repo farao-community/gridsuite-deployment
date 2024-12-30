@@ -1,0 +1,25 @@
+spring:
+  elasticsearch:
+    username: ${ELASTICSEARCH_USER:#{null}}
+    password: ${ELASTICSEARCH_PASSWORD:#{null}}
+  rabbitmq:
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+powsybl-ws:
+  environment: 
+
+  # Postgres database prefix
+  database:
+    databaseOrSchema:
+      prefix: ${powsybl-ws.environment:}
+
+  # RabbitMQ binding destination prefixes
+  rabbitmq:
+    destination:
+      prefix: ${powsybl-ws.environment:}
+
+  # elasticsearch index prefixes
+  elasticsearch:
+    index:
+      prefix: ${powsybl-ws.environment:}

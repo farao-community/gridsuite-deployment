@@ -1,0 +1,43 @@
+[{
+  "name" : "Study",
+  "url"  : "/gridstudy",
+  "appColor" : "#0CA789",
+  "hiddenInAppsMenu" : true,
+  "hiddenUserInformation": true,
+  "resources" : [
+    {
+      "types" : ["STUDY"],
+      "path" : "/studies/{elementUuid}"
+    }
+  ],
+  "predefinedEquipmentProperties" : {
+    "substation" : {
+      "Demo" : ["demo1", "demo2"]
+    }
+  },
+  "defaultParametersValues": {
+    "fluxConvention": "iidm",
+    "mapManualRefresh": "false"
+  }
+},
+{
+  "name" : "Explore",
+  "url"  : "/gridexplore",
+  "appColor" : "#33AFED",
+  "hiddenInAppsMenu" : false,
+  "hiddenUserInformation": true
+},
+{
+  "name" : "Dynamic Mapping",
+  "url"  : "/griddyna",
+  "appColor" : "#FFC11B",
+  "hiddenInAppsMenu" : false,
+  "hiddenUserInformation": true
+},
+{
+  "name" : "Admin",
+  "url"  : "/gridadmin",
+  "appColor" : "#FD3745",
+  "hiddenInAppsMenu" : true,
+  "hiddenUserInformation": true
+}]

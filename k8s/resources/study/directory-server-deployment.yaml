@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: directory-server
+  labels:
+    name: directory-server
+    version: "1"
+    app.kubernetes.io/component: gridsuite-springboot
+    gridsuite.org/springboot-with-database: "true"
+    gridsuite.org/springboot-with-rabbitmq: "true"
+  annotations:
+    gridsuite.org/size: springnative-xs
+spec:
+  selector:
+    matchLabels:
+      name: directory-server
+  template:
+    metadata:
+      labels:
+        name: directory-server
+    spec:
+      containers:
+      - name: main
+        image: docker.io/gridsuite/directory-server-native:latest
+        volumeMounts:
+        - mountPath: /config/specific
+          name: directory-server-configmap-specific-volume
+      volumes:
+        - name: directory-server-configmap-specific-volume
+          configMap:
+            name: directory-server-configmap-specific

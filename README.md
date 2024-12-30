@@ -1,305 +1,190 @@
-# GridSuite deployment
+# GridSuite local deployment
 
-## Gridsuite local install
+## Local setup
 
-### Cassandra install
+### Databases folders configuration
 
-Download the recommended version of Cassandra :
+All data must be stored under a common root directory whose location is defined by the environment variable **$GRIDSUITE_DATABASES**
 
-|Distribution| Version recommendation |Version  | Link|
---- | --- | --- | ---
-|Fedora|3.x|3.11.10|[Download](https://www.apache.org/dyn/closer.lua/cassandra/3.11.10/apache-cassandra-3.11.10-bin.tar.gz)|
-|Ubuntu|4.x|4.0.0|[Download](https://www.apache.org/dyn/closer.lua/cassandra/4.0.0/apache-cassandra-4.0.0-bin.tar.gz)|
+The following subdirectories must be created with file **mode 777 (rwx)** :
+- **cases** : working directory for cases-server
+- **postgres** : databases Postgres
+- **elasticsearch** : indexes (documents) Elasticsearch
+- **init** : data files for initialization
 
-
-
-In order to be accessible from k8s cluster, Cassandra has to be bind to one the ip address of the machine.  The following variables have to be modified in conf/cassandra.yaml before starting the Cassandra daemon.
-
-```yaml
-seed_provider:
-    - class_name: org.apache.cassandra.locator.SimpleSeedProvider
-      parameters:
-          - seeds: "<YOUR_IP>"
-
-listen_address: "<YOUR_IP>"
-
-rpc_address: "0.0.0.0"
-
-broadcast_rpc_address: "<YOUR_IP>"
-
-enable_materialized_views: true
+```
+$ cd $GRIDSUITE_DATABASES
+$ chmod 777 cases postgres elasticsearch init
 ```
 
-During development, to reduce ram usage, it is recommended to configure the Xmx and Xms in conf/jvm.options (v3.x) or conf/jvm-server.options (v4.x). Uncomment the Xmx and Xms lines, a good value to start with is `-Xms2G` and `-Xmx2G`.
+Optional : **cases** can be stored either on your filesystem, either in a minio container. If you choose the filesystem option, nothing need to be done.
 
-To start the cassandra server: 
+If you opt for the S3 option and the minio container, you have to define the following environnement variable : **STORAGE_TYPE=S3**
 
-``` 
-$ cd /path/to/cassandra/folder`
-$ bin/cassandra -f`
-```
-### Cassandra schema setup
+You can choose the filesystem option explicitly with : **STORAGE_TYPE=FS**
+
+
+| :warning:  These environment variables must be set and subdirectories created before running any containers with docker-compose ! |
+|---------------------------------------------------------------------------------------------------------------------------------|
+
+
+<a name="data_init"></a>When the postgres container is created, all databases are created automatically as well as the necessary initial data loading (geographical, lines catalog...).
+
+To do this, you must copy the following files in the init directory (_$GRIDSUITE_DATABASES/init_), **before** creating the postgres container:
+- [geo_data_substations.json](https://raw.githubusercontent.com/gridsuite/geo-data/main/src/test/resources/geo_data_substations.json)
+- [geo_data_lines.json](https://raw.githubusercontent.com/gridsuite/geo-data/main/src/test/resources/geo_data_lines.json)
+- [lines-catalog.json](https://raw.githubusercontent.com/gridsuite/network-modification-server/main/src/test/resources/lines-catalog.json)
+
+### Clone deployment repository
 
 ```bash
-$ bin/cqlsh
-```
-
-To create keyspaces in a single node cluster:
-
-```cql
-CREATE KEYSPACE IF NOT EXISTS <KEYSPACE_NAME_NETWORK_STORE> WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-CREATE KEYSPACE IF NOT EXISTS <KEYSPACE_NAME_GEO_DATA> WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1};
-CREATE KEYSPACE IF NOT EXISTS cgmes_boundary WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-CREATE KEYSPACE IF NOT EXISTS cgmes_assembling WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-CREATE KEYSPACE IF NOT EXISTS sa WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-CREATE KEYSPACE IF NOT EXISTS config WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1};
-```
-
-Then (for network store cassandra database) :
-```bash
-$ bin/cqlsh -k <KEYSPACE_NAME_NETWORK_STORE>
-```
-Copy paste following files content to cqlsh shell:
-[iidm.cql](https://raw.githubusercontent.com/powsybl/powsybl-network-store/master/network-store-server/src/main/resources/iidm.cql)
-
-Change Cassandra keyspace name in k8s/base/config/network-store-server-application.yml
-```properties
-cassandra-keyspace: <KEYSPACE_NAME_NETWORK_STORE>
-```
-
-
-Then (for geo-data cassandra database) :
-```bash
-$ bin/cqlsh -k <KEYSPACE_NAME_GEO_DATA>
-```
-Copy paste following files content to cqlsh shell:
-[geo_data.cql](https://raw.githubusercontent.com/powsybl/powsybl-geo-data/master/geo-data-server/src/main/resources/geo_data.cql)
-
-Change Cassandra keyspace name in k8s/base/config/geo-data-server-application.yml
-```properties
-cassandra-keyspace: <KEYSPACE_NAME_GEO_DATA>
-```
-
-
-Then (for other cassandra databases) :
-```bash
-$ bin/cqlsh
-```
-Copy/paste following files content to cqlsh shell:
-
-[cgmes_boundary.cql](https://raw.githubusercontent.com/gridsuite/cgmes-boundary-server/master/src/main/resources/cgmes_boundary.cql)    
-[cgmes_assembling.cql](https://raw.githubusercontent.com/gridsuite/cgmes-assembling-job/master/src/main/resources/cgmes_assembling.cql)    
-[sa.cql](https://raw.githubusercontent.com/gridsuite/security-analysis-server/master/src/main/resources/sa.cql)    
-[config.cql](https://raw.githubusercontent.com/gridsuite/config-server/master/src/main/resources/config.cql)    
-
-### PostgresSql install
-
-Postgresql is not as easy as cassandra to download and just run in its folder, but it's almost as easy. 
-To get a postgresql folder where you can just run postgresql, you have to compile from source (very easy because there 
-are almost no compilation dependencies) and run an init command once. If you prefer other methods, 
-feel free to install and run postgresql with your system package manager or with a dedicate docker container.
-
-**Postgres local install from code sources:**
-
-Download code sources from the following link: https://www.postgresql.org/ftp/source/v13.1/
- then unzip the downloaded file. For the simplest installation, copy paste the following commands in the unzipped folder (you can change POSTGRES_HOME if you want): 
-
-```shell
-#!/bin/bash
-POSTGRES_HOME="$HOME/postgres";
-./configure --without-readline --without-zlib --prefix="$POSTGRES_HOME";
-make;
-make install;
-cd "$POSTGRES_HOME";
-bin/initdb -D ./data;
-echo "host  all  all 0.0.0.0/0 md5" >> data/pg_hba.conf;
-bin/pg_ctl -D ./data start;
-bin/psql postgres -c  "CREATE USER postgres WITH PASSWORD 'postgres' SUPERUSER;";
-bin/pg_ctl -D ./data stop;
-```
-
-To start the server each time you want to work, cd in the POSTGRES_HOME folder you used during install and run
-```shell
-$ bin/postgres -D ./data --listen_addresses='*'
-```
-
-Bonus note: for more convenient options when developping (instead of this easy procedure for installing and just running the system), you can do these bonus steps:
-- use `-j8` during the make phase if you have a beefy machine to speed up compilation
-- install libreadline dev (fedora package: readline-devel, ubuntu: libreadline-dev) and remove `--without-readline` (this gives you navigability using arrows in the psql client if you use it often to run queries manually to diagnose or debug)
-- install zlib dev (fedora pacakge: zlib-devel , ubuntu: zlib1g-dev) and remove `--without-zlib` (this gives you compressed exports if you want to backup your databases..)
-- compile auto_explain (cd in the source folder in contrib/auto_explain, run make, make install) and configure it (add `shared_preload_libraries = 'auto_explain'` and
-`auto_explain.log_min_duration = 0` at the end postgresql.conf to log every query on the console for example). this requires a restart of postgres.
-
-### Postgres schema setup
-
-```bash
-$ bin/psql postgres
-$ create database ds;
-$ create database directory;
-$ create database study;
-$ create database actions;
-$ create database networkmodifications;
-$ create database merge_orchestrator;
-$ create database dynamicmappings;
-$ create database filters;
-$ create database report;
-```
-
-Then initialize the schemas for the databases: 
-
-
-`$ \c ds;` then copy/paste [result.sql](https://raw.githubusercontent.com/gridsuite/dynamic-simulation-server/main/src/main/resources/result.sql) content to psql    
-`$ \c directory;` then copy/paste [directory.sql](https://raw.githubusercontent.com/gridsuite/directory-server/main/src/main/resources/directory.sql) content to psql   
-`$ \c study;` then copy/paste [study.sql](https://raw.githubusercontent.com/gridsuite/study-server/master/src/main/resources/study.sql) content to psql   
-`$ \c actions;` then copy/paste [actions.sql](https://raw.githubusercontent.com/gridsuite/actions-server/master/src/main/resources/actions.sql) content to psql   
-`$ \c networkmodifications;` then copy/paste [network-modification.sql](https://raw.githubusercontent.com/gridsuite/network-modification-server/master/src/main/resources/network-modification.sql) content to psql   
-`$ \c merge_orchestrator;` then copy/paste [merge_orchestrator.sql](https://raw.githubusercontent.com/gridsuite/merge-orchestrator-server/master/src/main/resources/merge_orchestrator.sql) content to psql   
-`$ \c dynamicmappings;` then copy/paste [mappings.sql](https://raw.githubusercontent.com/gridsuite/dynamic-mapping-server/master/src/main/resources/mappings.sql) and  [IEEE14Models.sql](https://raw.githubusercontent.com/gridsuite/dynamic-mapping-server/master/src/main/resources/IEEE14Models.sql)content to psql   
-`$ \c filters;` then copy/paste [filter.sql](https://raw.githubusercontent.com/gridsuite/filter-server/master/src/main/resources/filter.sql) content to psql   
-`$ \c report;` then copy/paste [report.sql](https://raw.githubusercontent.com/gridsuite/report-server/master/src/main/resources/report.sql) content to psql   
-
-### Cases folders configuration
-
-| :warning:  BEFORE running any containers!   |
-|---------------------------------------------|
-
-Create a `~/cases/` folder in your /home/user root folder.
-then assign rwx credentials to it.
-```
-chmod 777 cases
-```
-This is a working directory for cases-server.
-
-### Minikube and kubectl setup
-
-This setup is heavyweight and matches a realworld deployment. It is useful to reproduce realworld kubernetes effects and features. In most cases, the lighter docker-compose deployment is preferred.
-Download and install [minikube](https://kubernetes.io/fr/docs/tasks/tools/install-minikube/) and [kubectl](https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/).
-We require minikube 1.21+ for host.minikube.internal support inside containers (if you want to use an older minikube, replace host.minikube.internal with the IP of your host).
-
-Start minikube and activate ingress support:
-```bash
-$ minikube start --memory 24g --cpus=4
-$ minikube addons enable ingress
-```
-
-Verify everything is ok with:
-```bash
-$ minikube status
-$ minikube kubectl cluster-info
-```
-
-### K8s deployment
-
-Clone deployment repository:
-```bash 
 $ git clone https://github.com/gridsuite/deployment.git
 $ cd deployment
 ```
 
-Get you ingress ip
+## Docker compose deployment
+
+> **Important**
+> [Docker Compose v2](https://docs.docker.com/compose/install/standalone/) is mandatory.  
+> _See instructions in [sub-section](#installing--updating-docker-compose-to-v2)_
+
+
+### Application profiles _(alias)_
+> [!NOTE]  
+> If you want to use profiles other than the ones associated with the folders (`dynamic-mapping`, `study`, `suite`, `technical`), you have to use profiles as explained in the [next section](#docker-compose-profiles).
+
 ```bash
-$ INGRESS_HOST=`minikube ip`
-$ echo $INGRESS_HOST
-```
-
-Fill config files with the INGRESS_HOST in k8s/overlays/local/ :
-```bash
-$ sed -i -e "s/<INGRESS_HOST>/${INGRESS_HOST}/g" k8s/overlays/local/*
-```
-
-Optionally, give an ssh access to the case importing cronjobs by providing your username and your password (or create a dedicated user for this if you want):
-The import jobs connect through ssh to your machine and automatically import files from the $HOME/opde and $HOME/boundaries
-```bash
-$ sed -i -e 's/<USERNAME>/YOURUSERNAME/g' k8s/overlays/local/*
-$ sed -i -e 's/<PASSWORD>/YOURPASSWORD/g' k8s/overlays/local/*
-```
-
-Deploy k8s services:
-```bash 
-$ kubectl apply -k k8s/overlays/local
-```
-
-Verify all services and pods have been correctly started:
-```bash 
-$ kubectl get all
-```
-You can now access to the application and the swagger UI of all the Spring services:
-
-Applications:
-```html
-http://<MINIKUBE_IP>/gridstudy-app/
-http://<MINIKUBE_IP>/gridmerge-app/
-http://<MINIKUBE_IP>/gridactions-app/
-http://<MINIKUBE_IP>/griddyna-app/
-http://<MINIKUBE_IP>/gridexplore-app/
-```
-
-Swagger UI:
-```html
-http://<MINIKUBE_IP>/case-server/swagger-ui.html
-http://<MINIKUBE_IP>/cgmes-gl-server/swagger-ui.html
-http://<MINIKUBE_IP>/geo-data-server/swagger-ui.html
-http://<MINIKUBE_IP>/network-conversion-server/swagger-ui.html
-http://<MINIKUBE_IP>/network-store-server/swagger-ui.html
-http://<MINIKUBE_IP>/network-map-server/swagger-ui.html
-http://<MINIKUBE_IP>/odre-server/swagger-ui.html
-http://<MINIKUBE_IP>/single-line-diagram-server/swagger-ui.html
-http://<MINIKUBE_IP>/study-server/swagger-ui.html
-http://<MINIKUBE_IP>/network-modification-server/swagger-ui.html
-http://<MINIKUBE_IP>/loadflow-server/swagger-ui.html
-http://<MINIKUBE_IP>/merge-orchestrator-server/swagger-ui.html
-http://<MINIKUBE_IP>/cgmes-boundary-server/swagger-ui.html
-http://<MINIKUBE_IP>/actions-server/swagger-ui.html
-http://<MINIKUBE_IP>/security-analysis-server/swagger-ui.html
-http://<MINIKUBE_IP>/config-server/swagger-ui.html
-http://<MINIKUBE_IP>/directory-server/swagger-ui.html
-http://<MINIKUBE_IP>/balances-adjustment-server/swagger-ui.html
-http://<MINIKUBE_IP>/case-validation-server/swagger-ui.html
-http://<MINIKUBE_IP>/dynamic-simulation-server/swagger-ui.html
-http://<MINIKUBE_IP>/filter-server/swagger-ui.html 
-http://<MINIKUBE_IP>/report-server/swagger-ui.html
-```
-
-### Docker compose  deployment
-
-This is the preferred development deployment.
-Install the orchestration tool docker-compose then launch the desired profile :
-
-```bash 
 $ cd docker-compose/suite
-$ docker-compose up
+$ docker compose up
 ```
-```bash 
+```bash
 $ cd docker-compose/study
-$ docker-compose up
+$ docker compose up
 ```
-```bash 
-$ cd docker-compose/merging
-$ docker-compose up
-```
-
-```bash 
-$ cd docker-compose/actions
-$ docker-compose up
-```
-
-```bash 
+```bash
 $ cd docker-compose/dynamic-mapping
-$ docker-compose up
+$ docker compose up
 ```
-Note : When using docker-compose for deployment, your machine is accessible from the containers thought the ip adress
-`172.17.0.1` so to make the cassandra cluster, running on your machine, accessible from the deployed
-containers change the '<YOUR_IP>' of the first section to `172.17.0.1`
+
+__Note__ : When using docker-compose for deployment, your machine is accessible from the containers thought the ip address 172.17.0.1
+
+__Note__ : The containers are accessible from your machine thought the ip address `127.0.0.1` (localhost) or `172.17.0.1` and the corresponding port
+
+__Note__ :
+These folders (other than `explicit-profiles`) act now like an alias to `docker compose --project-name grid<name> --profile <folder_name> ...`,
+with the difference that they have implicitly a profile active and will be considered like another project stack,
+so compose commands will not affect others folders state.
+
+### Docker-compose profiles
+This is the preferred development deployment.  
+_Everything described in this section is inside the folder `explicit-profiles`._
+
+Here's the summary of the profiles and what services they includes:
+| Component \ Service | _(none)_ | study | study-light | dynamic-mapping | dynamic-simulation | suite | import | kibana | pgadmin | metrics |
+|---|---|---|---|---|---|---|---|---|---|---|
+| rabbitmq<br/>postgres<br/>elasticsearch<br/>minio* | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| kibana<br/>logstash<br/>socat<br/>logspout | | | | | | | | ✅ | | |
+| pgadmin | | | | | | | | | ✅ | |
+| apps&#8209;metadata&#8209;server<br/>mock&#8209;user&#8209;service<br/>gateway<br/>actions&#8209;server<br/>case&#8209;server<br/>config&#8209;notification&#8209;server<br/>config&#8209;server<br/>filter&#8209;server<br/>loadflow&#8209;server<br/>network&#8209;conversion&#8209;server<br/>network&#8209;store&#8209;server<br/>report&#8209;server<br/>user&#8209;admin&#8209;server | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | |
+| griddyna&#8209;app<br/>dynamic&#8209;mapping&#8209;server | | | | ✅ | ✅ | ✅ | | | | |
+| gridstudy&#8209;app<br/>dynamic&#8209;simulation&#8209;server<br/>dynamic&#8209;security&#8209;analysis&#8209;server<br/>timeseries&#8209;server | | | | | ✅ | ✅ | | | | |
+| cgmes&#8209;gl&#8209;server<br/>odre&#8209;server<br/>security&#8209;analysis&#8209;server<br/>sensitivity&#8209;analysis&#8209;server<br/>shortcircuit&#8209;server<br/>voltage&#8209;init&#8209;server<br/>gridadmin&#8209;app | | ✅ | | | | ✅ | | | | |
+| directory&#8209;notification&#8209;server<br/>directory&#8209;server<br/>explore&#8209;server<br/>geo&#8209;data&#8209;server<br/>gridexplore&#8209;app<br/>network&#8209;map&#8209;server<br/>network&#8209;modification&#8209;server<br/>single&#8209;line&#8209;diagram&#8209;server<br/>study&#8209;notification&#8209;server<br/>study&#8209;server | | ✅ | ✅ | | ✅ | ✅ | | | | |
+| case&#8209;import&#8209;server | | | | | | | ✅ | | | |
+| grafana<br/>prometheus | | | | | | | | | | ✅ |
+
+\* Minio is only launched when **$STORAGE_TYPE** is set to 'S3'
+
+To use a profile, you use:
+```shell
+$ cd docker-compose/explicit-profiles
+$ docker compose --profile suite <cmd>
+```
+
+You can also combine multiple profiles:
+```shell
+$ docker compose --profile study --profile dynamic-mapping <cmd>
+```
+
+> [!IMPORTANT]  
+> The `--profile` argument isn't always mandatory with some commands:
+>   * With the commands `up` & `down`, services/container who belongs to at least one profile can't be accessed if the profile isn't specified.
+>     For example `docker compose up study-server` would not work because the profile `study` isn't passed in the CLI.
+>     The correct CLI would be `docker compose --profile study up study-server`.
+>   * With the commands `start`, `stop`, `restart`, the `--profile ...` has no effect because theses commands affect the containers already created by a previous `up` command.
+
+To change the running profile('s) without `down`&`up` everything (for example you have `up` the profile `suite` and you want now use the profile `study`), you can instead `stop` & `up`:
+```shell
+# previously: docker compose --profile suite up -d
+$ docker compose --profile suite stop
+$ docker compose --profile study up -d
+```
+
+In case you want to do a `down` for everything, an `all` profile exist to simplify :
+```shell
+$ docker compose --profile all down
+```
+
+If you still have a container existing in the project, you will have this message during the `down`:
+```
+$ docker compose down
+[+] Running 2/1
+ ✔ Container abc-server             Removed                      10.6s
+ ! Network gridsuite_default        Resource is still in use     0.0s
+```
+
+
+### Technical profile
+
+This profile allows you to launch only the technical services : postgres, elasticsearch, rabbitmq, ...
+
+| Software      | Version    | Flavor     |
+|---------------|------------|------------|
+| Postgres      | 14.9       |            |
+| RabbitMQ      | 4.0.4      | management |
+| Elasticsearch | 8.7.1      |            |
+| Grafana       | 10.2.2     |            |
+| Prometheus    | v2.28.1    |            |
+| Minio         | 2023-09-27 |            |
+
+
+It is used for k8s deployment with Minikube.
+
+```bash
+$ cd docker-compose/technical
+$ docker compose up
+```
+
+### Update docker-compose images
+To synchronize with the latest images for a docker-compose profile, you need to :
+- delete the containers
+```bash
+$ docker compose down
+```
+- get latest images
+```bash
+$ docker compose pull
+```
+- recreate containers
+```bash
+$ docker compose up
+```
+
+- remove old images
+```bash
+$ docker image prune -f
+```
+
+### Applications and Swagger URLs
 
 You can now access to all applications and swagger UIs of the Spring services of the chosen profile:
 
 Applications:
 ```html
-http://localhost:80 // gridstudy
-http://localhost:81 // gridmerge
-http://localhost:82 // gridactions
+http://localhost:80 // gridexplore
+http://localhost:82 // gridadmin
 http://localhost:83 // griddyna
-http://localhost:84 // gridexplore
+http://localhost:84 // gridstudy
 ```
 
 Swagger UI:
@@ -315,65 +200,317 @@ http://localhost:5005/swagger-ui.html  // single-line-diagram-server
 http://localhost:5001/swagger-ui.html  // study-server
 http://localhost:5007/swagger-ui.html  // network-modification-server
 http://localhost:5008/swagger-ui.html  // loadflow-server
-http://localhost:5020/swagger-ui.html  // merge-orchestrator-server
-http://localhost:5021/swagger-ui.html  // cgmes-boundary-server
 http://localhost:5022/swagger-ui.html  // actions-server
 http://localhost:5023/swagger-ui.html  // security-analysis-server
 http://localhost:5025/swagger-ui.html  // config-server
 http://localhost:5026/swagger-ui.html  // directory-server
 http://localhost:5028/swagger-ui.html  // report-server
+http://localhost:5029/swagger-ui.html  // explore-server
 http://localhost:5036/swagger-ui.html  // dynamic-mapping-server
 http://localhost:5032/swagger-ui.html  // dynamic-simulation-server
+http://localhost:5040/swagger-ui.html  // dynamic-security-analysis-server
 http://localhost:5027/swagger-ui.html  // filter-server
-http://localhost:5010/swagger-ui.html  // balances-adjustment-server
-http://localhost:5011/swagger-ui.html  // case-validation-server
+http://localhost:5033/swagger-ui.html  // user-admin-server
+http://localhost:5034/swagger-ui.html  // user-identity-server
+http://localhost:5030/swagger-ui.html  // sensitivity-analysis-server
+http://localhost:5031/swagger-ui.html  // shortcircuit-server
+http://localhost:5035/swagger-ui.html  // study-config-server
+http://localhost:5037/swagger-ui.html  // timeseries-server
+http://localhost:5038/swagger-ui.html  // voltage-init-server
+http://localhost:5039/swagger-ui.html  // case-import-server
 ```
+
+### RabbitMQ console
+
 RabbitMQ management UI:
+
 ```html
 http://localhost:15672
-default credentials : 
+default credentials :
    - username : guest
    - password : guest
 ```
+
+### PgAdmin for PostgreSQL administration
+
+PgAdmin UI:
+
+```html
+http://localhost:12080/login
+default credentials :
+   - username : admin@localhost.com
+   - password : admin
+```
+
+To connect to the PostgreSQL database, the postgres container must be up.
+Then, you can add a new server with the following configurations :
+
+```html
+Host name/address : postgres
+Port : 5432
+Maintenance database : postgres
+Username : postgres
+Password : postgres
+```
+
+### Kibana console for Elasticsearch
+
 Kibana management UI:
 ```html
 http://localhost:5601
 ```
 In order to show documents in the case-server index with Kibana, you must first create the index pattern ('Management' page) : case-server*
 
-### RTE Geographical data importation
-
-To populate the geo-data-server with RTE geographic lines and substations data, you must use the `odre-server` swagger UI (see the URL above) to automaticaly download and import those data in your database. Both REST requests must be executed.
-
-**Note**: Be sure to have at least `odre-server` and `geo-data-server` containers running.
-
-**Note 2**: if you are behind a proxy server : download the csv files from thoses links :
-
- * [postes-electriques-rte.csv](https://opendata.reseaux-energies.fr/explore/dataset/postes-electriques-rte/download/?format=csv&timezone=Europe/Berlin&use_labels_for_header=true)
- * [lignes-aeriennes-rte.csv](https://opendata.reseaux-energies.fr/explore/dataset/lignes-aeriennes-rte/download/?format=csv&timezone=Europe/Berlin&use_labels_for_header=true)
- * [lignes-souterraines-rte.csv](https://opendata.reseaux-energies.fr/explore/dataset/lignes-souterraines-rte/download/?format=csv&timezone=Europe/Berlin&use_labels_for_header=true)
-
-
-Create a "GeoData" directory in the HOME folder and move thoses files inside.    
-Stop `odre-server` container if running.    
-Open the odre server project in your favorite IDE.    
-You must change the used client in `src/main/java/org/gridsuite/odre/server/services/OdreServiceImpl.java`
-
-```diff
--@Qualifier("odreDownloadClientImpl")
-+@Qualifier("odreCsvClientImpl")
+### Grafana console for metrics
+Grafana UI:
+```html
+http://localhost:7000
 ```
-This will allow to import the data from the local folder instead of downloading them.
-Then rebuild and run this server.
-Both REST requests still must be executed.
+
+### Minio console
+
+Minio management UI:
+
+```html
+http://localhost:19090
+default credentials :
+   - username : minioadmin
+   - password : minioadmin
+```
 
 
-### Working with Spring services
+### Installing / Updating docker-compose to v2
+[Docker compose v2](https://github.com/docker/compose) is necessary to be able to use this compose project which uses [profiles feature](https://docs.docker.com/compose/profiles/).  
+If possible, prefer to install it with your package manager if you are on a Unix system.
+
+> [!NOTE]  
+> You need a client (docker-cli) of ~v19~ v20 at least to have the system of cli-plugins.
+> It isn't necessary to update your Docker engine or client else.
+
+You can install Docker Compose v2 with these commands, as instructed in [the doc](https://docs.docker.com/compose/install/linux/#install-the-plugin-manually) and the [migration guide](https://docs.docker.com/compose/migrate/):
+```shell
+curl -LR --create-dirs -o $HOME/.local/bin/docker-compose https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+#wget -x -O $HOME/.local/bin/docker-compose https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+chmod +x $HOME/.local/bin/docker-compose
+mkdir -p $HOME/.docker/cli-plugins
+ln -s $HOME/.local/bin/docker-compose $HOME/.docker/cli-plugins/docker-compose
+docker compose version
+```
+You must get this output from docker compose now:
+> Docker Compose version v2.xx.x
+
+> [!IMPORTANT]  
+> The commands shown will install the plugin user-side, so you don't need to remove your old docker-compose v1 if it is installed system-wide.
+
+
+## k8s deployment with Minikube
+
+### Minikube and kubectl setup
+
+This setup is heavyweight and matches a realworld deployment. It is useful to reproduce realworld kubernetes effects and features. In most cases, the lighter docker-compose deployment is preferred.
+
+Download the recommended version of minikube and kubectl :
+
+| Software | Version recommendation | Last supported version | Link                                                                                                  |
+|----------|------------------------|------------------------|-------------------------------------------------------------------------------------------------------|
+| kubectl  | 1.21+                  | 1.27.4                 | [Download](https://storage.googleapis.com/kubernetes-release/release/v1.27.4/bin/linux/amd64/kubectl) |
+| minikube | 1.21+                  | 1.31.2                 | [Download](https://storage.googleapis.com/minikube/releases/v1.31.2/minikube-linux-amd64)             |
+
+
+install [minikube](https://kubernetes.io/fr/docs/tasks/tools/install-minikube/#installez-minikube-par-t%C3%A9l%C3%A9chargement-direct) and [kubectl](https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/#installer-le-binaire-de-kubectl-avec-curl-sur-linux) following instructions for binaries download installation.
+
+__Notes__: We require minikube 1.21+ for host.minikube.internal support inside containers (if you want to use an older minikube, replace host.minikube.internal with the IP of your host).
+
+__Notes__: Minikube 1.32.0 has been tested and is not working on our stack, so please use version 1.31.2 or below.
+
+Start minikube :
+```bash
+$ minikube start --memory 24g --cpus=4
+```
+
+To specify the driver used by minikube and use specific version of kubernetes you could alternatively use :
+```bash
+$ minikube start --memory 24g --cpus=4 --driver=virtualbox --kubernetes-version=1.22.3
+```
+
+__Notes__: With last version of minikube, *docker* is the default driver (was *virtualbox* before) which could forbid memory definition depending of your user privilegies.
+
+see [kubernetes-version param doc](https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64) for versions support.
+
+Activate ingress support:
+```bash
+$ minikube addons enable ingress
+```
+
+Verify everything is ok with:
+```bash
+$ minikube status
+$ minikube kubectl cluster-info
+```
+
+### Minikube deployment
+
+Get you ingress ip
+```bash
+$ INGRESS_HOST=`minikube ip`
+$ echo $INGRESS_HOST
+```
+
+Fill config files with the INGRESS_HOST in k8s/live/local/ :
+```bash
+$ find k8s/live/local/ -type f | xargs sed -i -e "s/<INGRESS_HOST>/${INGRESS_HOST}/g"
+```
+
+Optionally, give an ssh access to the case importing cronjobs by providing your username and your password (or create a dedicated user for this if you want):
+The import jobs connect through ssh to your machine and automatically import files from the $HOME/opde and $HOME/boundaries
+```bash
+$ find k8s/live/local/ -type f | xargs sed -i -e 's/<USERNAME>/YOURUSERNAME/g'
+$ find k8s/live/local/ -type f | xargs sed -i -e 's/<PASSWORD>/YOURPASSWORD/g'
+```
+
+Start technical services with the docker-compose technical profile  :
+```bash
+$ cd docker-compose/technical
+$ docker compose up -d
+```
+
+Deploy k8s services:
+```bash
+$ kubectl apply -k k8s/live/local
+```
+
+Verify all services and pods have been correctly started:
+```bash
+$ kubectl get all
+```
+You can now access to the application and the swagger UI of all the Spring services:
+
+Applications:
+```html
+http://<INGRESS_HOST>/gridstudy/
+http://<INGRESS_HOST>/griddyna/
+http://<INGRESS_HOST>/gridexplore/
+http://<INGRESS_HOST>/gridadmin/
+```
+
+Swagger UI:
+```html
+http://<INGRESS_HOST>/case-server/swagger-ui.html
+http://<INGRESS_HOST>/cgmes-gl-server/swagger-ui.html
+http://<INGRESS_HOST>/geo-data-server/swagger-ui.html
+http://<INGRESS_HOST>/network-conversion-server/swagger-ui.html
+http://<INGRESS_HOST>/network-store-server/swagger-ui.html
+http://<INGRESS_HOST>/network-map-server/swagger-ui.html
+http://<INGRESS_HOST>/odre-server/swagger-ui.html
+http://<INGRESS_HOST>/single-line-diagram-server/swagger-ui.html
+http://<INGRESS_HOST>/study-server/swagger-ui.html
+http://<INGRESS_HOST>/network-modification-server/swagger-ui.html
+http://<INGRESS_HOST>/loadflow-server/swagger-ui.html
+http://<INGRESS_HOST>/actions-server/swagger-ui.html
+http://<INGRESS_HOST>/security-analysis-server/swagger-ui.html
+http://<INGRESS_HOST>/config-server/swagger-ui.html
+http://<INGRESS_HOST>/directory-server/swagger-ui.html
+http://<INGRESS_HOST>/dynamic-simulation-server/swagger-ui.html
+http://<INGRESS_HOST>/dynamic-security-analysis-server/swagger-ui.html
+http://<INGRESS_HOST>/filter-server/swagger-ui.html
+http://<INGRESS_HOST>/report-server/swagger-ui.html
+http://<INGRESS_HOST>/user-admin-server/swagger-ui.html
+http://<INGRESS_HOST>/user-identity-server/swagger-ui.html
+http://<INGRESS_HOST>/sensitivity-analysis-server/swagger-ui.html
+http://<INGRESS_HOST>/shortcircuit-server/swagger-ui.html
+http://<INGRESS_HOST>/timeseries-server/swagger-ui.html
+http://<INGRESS_HOST>/voltage-init-server/swagger-ui.html
+http://<INGRESS_HOST>/case-import-server/swagger-ui.html
+http://<INGRESS_HOST>/study-config-server/swagger-ui.html
+```
+
+## How to use a local docker image into Minikube?
+
+Build and load a local image into Minikube:
+```bash
+$ mvn clean install jib:dockerBuild -Djib.to.image=local/<pod>
+$ minikube image load local/<pod>
+```
+__Notes__: If you have issues, you can build with the Docker deamon bundled in the minikube to directly have access to the image inside the minikube, [instructions here](https://minikube.sigs.k8s.io/docs/handbook/pushing/)
+
+Then add it to your deployment before (re)deploy:
+```bash
+$ vi <pod>-deployment.yaml
++  image: docker.io/local/<pod>:latest
+```
+
+Check the pod has started with your local image:
+```bash
+$ kubectl describe pod <pod-instance> | grep "Image:"
+  Image:         docker.io/local/<pod>:latest
+```
+
+## Multiple environments with customized prefixes
+
+To deploy multiple environments we can use customized prefixed databases (Postgres), queues (rabbitMq) and indexes (elasticsearch).
+
+You must follow those steps:
+1. Edit the `docker-compose/.env` file and  specify the prefix by defining the `DATABASE_PREFIX_NAME` property
+```yaml
+DATABASE_PREFIX_NAME=dev_
+```
+2. Edit the `k8s/base/config/common-application.yml` file and specify the prefix by defining the `environement` property
+```yaml
+powsybl-ws:
+  environment: dev_
+```
+
+:warning: do not forget to include underscore '_'
+
+After this configuration :
+* every services which use a Postgres database will call to **dev_**`{dbName}` database.
+* every services which provide or read a rabbitMq queue will call to **dev_**`{queueName}` queue.
+* every services which use a elasticsearch index will call to **dev_**`{indexName}` index.
+
+
+## Databases creation and data initialization
+
+Considering databases are created automatically as well as the necessary initial data (geographical, lines catalog, ...), the following part concerns only the databases recreation and/or the update of the initial data.
+All actions can be done from a docker-compose profile.
+
+### Databases creation
+
+With a terminal, go to the docker directory where you ran the `docker compose up -d` command.
+
+Make sure the `postgres` service is up with the `docker compose ps | grep postgres` command.
+```bash
+$ docker compose exec postgres /create-postgres-databases.sh
+```
+
+### Data initialization
+
+First update the data files in the directory `$GRIDSUITE_DATABASES/init`
+
+[See the initial data loading section for more information.](#data_init)
+
+Alternatively, you can do this :
+
+With a terminal, go to the docker directory where you ran the `docker compose up -d` command.
+
+Make sure the `postgres`, `odre-server`, `geo-data-server` and `network-modification-server` services are up with the `docker compose ps` command.
+```bash
+$ docker compose exec postgres /init-geo-data.sh
+$ docker compose exec postgres /init-lines-catalog.sh
+```
+
+**Note**: For RTE geographic data (lines and substations), alternately, you can use the `odre-server` swagger UI (see the URL above) to automaticaly download and import those data in your database. You have to execute those REST requests :
+
+* .../substations
+* .../lines
+
+Be sure to have at least `odre-server` and `geo-data-server` containers running.
+
+## Working with Spring services
 
 In order to use your own versions of Spring services with docker-compose, you have to generate your own Docker images (using jib:dockerBuild Maven goal) and modify the docker-compose.yml to use these images.
 
 Docker image is generated using the following command in the considered service folder:
-```bash 
+```bash
 mvn jib:dockerBuild -Djib.to.image=<my_image_name>
 ```
 Once the image has been generated, you have to modify the name of the image to use in docker-compose.yml file, for the considered service:
@@ -384,5 +521,5 @@ services:
     image: <my_image_name>:latest
 ...
 ```
-Now, when using ```docker-compose up```, your custom Docker image will be used. 
+Now, when using ```docker compose up```, your custom Docker image will be used.
 

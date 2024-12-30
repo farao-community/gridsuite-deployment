@@ -1,0 +1,8 @@
+{
+    "authority" : "http://<INGRESS_HOST>/oidc-mock-server/",
+    "client_id" : "gridexplore-client",
+    "redirect_uri": "http://<INGRESS_HOST>/gridexplore/sign-in-callback",
+    "post_logout_redirect_uri" : "http://<INGRESS_HOST>/gridexplore/logout-callback",
+    "silent_redirect_uri" : "http://<INGRESS_HOST>/gridexplore/silent-renew-callback",
+    "scope" : "openid"
+}
