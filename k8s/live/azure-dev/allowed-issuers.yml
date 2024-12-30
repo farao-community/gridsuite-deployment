@@ -1,1 +1,1 @@
-allowed-issuers: https://auth-tmp.farao-community.com/realms/GridCapa, https://gridcapa-dev-tmp.farao-community.com/apps-metadata
+allowed-issuers: https://auth.farao-community.com/realms/GridCapa, https://gridcapa-dev.farao-community.com/apps-metadata
