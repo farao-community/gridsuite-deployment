@@ -13,6 +13,7 @@ data:
       create database "dev_ds";
       create database "dev_directory";
       create database "dev_study";
+      create database "dev_studyconfig";
       create database "dev_actions";
       create database "dev_networkmodifications";
       create database "dev_merge_orchestrator";
@@ -27,6 +28,8 @@ data:
       create database "dev_import_history";
       create database "dev_cgmes_assembling";
       create database "dev_useradmin";
+      create database "dev_useridentity_oidcreplication";
+      create database "dev_dynamicsecurityanalysis";
       create database "dev_sensitivityanalysis";
       create database "dev_shortcircuit";
       create database "dev_case_metadata";

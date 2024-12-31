@@ -1,14 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - ../../overlays/azure
-
 components:
   - ../../components/gridsuite
   - ../../components/azure
 
 resources:
+  - ../../overlays/azure
   - postgresql-pv-claim.yaml
   - postgresql-service.yaml
   - postgresql-deployment.yaml
