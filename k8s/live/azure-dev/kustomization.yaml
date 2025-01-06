@@ -11,6 +11,8 @@ resources:
   - postgresql-service.yaml
   - postgresql-deployment.yaml
   - postgresql-configmap.yaml
+#  Useful to manually import data via swagger
+  - geo-data-server-ingress.yaml
   - rabbitmq-configmap.yaml
   - rabbitmq-service.yaml
   - rabbitmq-statefulset.yaml
@@ -155,4 +157,9 @@ patches:
       kind: Ingress
       name: gridadmin-app-ingress
     path: patch_ingress.yaml
-
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: geo-data-server-ingress
+    path: patch_ingress.yaml

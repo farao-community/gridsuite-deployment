@@ -4,5 +4,5 @@
     "redirect_uri": "https://gridcapa-dev.farao-community.com/griddyna/sign-in-callback",
     "post_logout_redirect_uri" : "https://gridcapa-dev.farao-community.com/griddyna/logout-callback",
     "silent_redirect_uri" : "https://gridcapa-dev.farao-community.com/griddyna/silent-renew-callback",
-    "scope" : "openid User.read profile"
+    "scope" : "openid profile email"
 }
