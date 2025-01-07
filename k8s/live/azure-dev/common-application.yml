@@ -5,8 +5,8 @@ spring:
     uris:
       - http://elasticsearch:9200
   rabbitmq:
-    username: ${RABBITMQ_USER:gridcapa}
-    password: ${RABBITMQ_PASSWORD:gridcapaRABBITMQ1234*!}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
     addresses: rabbitmq:5672
     address-shuffle-mode: random
 
