@@ -15,7 +15,7 @@ powsybl-ws:
 
   # Postgres database prefix
   database:
-    host: gridcapa-postgresql
+    host: gridsuite-postgresql
     databaseOrSchema:
       prefix: ${powsybl-ws.environment:}
 

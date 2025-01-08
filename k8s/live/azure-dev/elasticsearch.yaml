@@ -3,18 +3,18 @@ kind: StatefulSet
 metadata:
   name: elasticsearch
   labels:
-    app: gridcapa
+    app: gridsuite
     component: elasticsearch
 spec:
   serviceName: elasticsearch
   selector:
     matchLabels:
-      app: gridcapa
+      app: gridsuite
       component: elasticsearch
   template:
     metadata:
       labels:
-        app: gridcapa
+        app: gridsuite
         component: elasticsearch
       annotations:
         "cluster-autoscaler.kubernetes.io/safe-to-evict": "false"
@@ -125,7 +125,7 @@ kind: Service
 metadata:
   name: elasticsearch
   labels:
-    app: gridcapa
+    app: gridsuite
     component: elasticsearch
 spec:
   type: ClusterIP
@@ -134,6 +134,6 @@ spec:
       port: 9200
       protocol: TCP
   selector:
-    app: gridcapa
+    app: gridsuite
     component: elasticsearch
 

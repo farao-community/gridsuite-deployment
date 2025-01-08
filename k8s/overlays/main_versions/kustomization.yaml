@@ -1,0 +1,73 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+metadata:
+  name: fix-image-tags
+images:
+  - name: docker.io/gridsuite/loadflow-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/actions-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/config-notification-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/config-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/filter-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/gateway
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/report-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/study-config-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/user-admin-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/user-identity-oidc-replication-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/case-import-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/cgmes-gl-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/directory-notification-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/directory-server-native
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/explore-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/geo-data-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/gridadmin-app
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/gridexplore-app
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/gridstudy-app
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/network-map-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/network-modification-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/odre-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/security-analysis-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/sensitivity-analysis-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/shortcircuit-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/study-notification-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/study-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/voltage-init-server
+    newTag: 2.11.0
+  - name: docker.io/gridsuite/timeseries-server
+    newTag: latest
+  - name: docker.io/gridsuite/oidc-mock-server
+    newTag: latest
+  - name: docker.io/gridsuite/dynamic-security-analysis-server
+    newTag: latest
+  - name: docker.io/gridsuite/dynamic-simulation-server
+    newTag: latest
+  - name: docker.io/gridsuite/dynamic-mapping-server
+    newTag: latest
+  - name: docker.io/gridsuite/griddyna-app
+    newTag: latest

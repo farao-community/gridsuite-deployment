@@ -4,6 +4,7 @@ kind: Kustomization
 components:
   - ../../components/gridsuite
   - ../../components/azure
+  - ../../overlays/main_versions
 
 resources:
   - ../../overlays/azure
@@ -13,6 +14,8 @@ resources:
   - postgresql-configmap.yaml
 #  Useful to manually import data via swagger
   - geo-data-server-ingress.yaml
+  - odre-server-ingress.yaml
+  - network-modification-server-ingress.yaml
   - rabbitmq-configmap.yaml
   - rabbitmq-service.yaml
   - rabbitmq-statefulset.yaml
@@ -162,4 +165,16 @@ patches:
       version: v1
       kind: Ingress
       name: geo-data-server-ingress
+    path: patch_ingress.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: odre-server-ingress
+    path: patch_ingress.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: network-modification-server-ingress
     path: patch_ingress.yaml

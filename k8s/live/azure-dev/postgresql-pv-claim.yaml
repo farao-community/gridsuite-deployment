@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: gridsuite-postgresql-storage
   labels:
-    app: gridcapa
+    app: gridsuite
     component: postgresql
 spec:
   storageClassName: azure-storage-class

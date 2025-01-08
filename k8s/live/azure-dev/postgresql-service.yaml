@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: gridcapa-postgresql
+  name: gridsuite-postgresql
   labels:
-    app: gridcapa
+    app: gridsuite
     component: postgresql
 spec:
   type: ClusterIP
   selector:
-    app: gridcapa
+    app: gridsuite
     component: postgresql
   ports:
     - port: 5432

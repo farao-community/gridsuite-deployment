@@ -1,24 +1,24 @@
   apiVersion: apps/v1
   kind: StatefulSet
   metadata:
-    name: gridcapa-rabbitmq
+    name: gridsuite-rabbitmq
     labels:
-      app: gridcapa
-      component: gridcapa-rabbitmq
+      app: gridsuite
+      component: gridsuite-rabbitmq
   spec:
     selector:
       matchLabels:
-        app: gridcapa
-        component: gridcapa-rabbitmq
+        app: gridsuite
+        component: gridsuite-rabbitmq
     # headless service that gives network identity to the RMQ nodes, and enables them to cluster
-    serviceName: gridcapa-rabbitmq # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set. Pods get DNS/hostnames that follow the pattern: pod-specific-string.serviceName.default.svc.cluster.local where "pod-specific-string" is managed by the StatefulSet controller.
+    serviceName: gridsuite-rabbitmq # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set. Pods get DNS/hostnames that follow the pattern: pod-specific-string.serviceName.default.svc.cluster.local where "pod-specific-string" is managed by the StatefulSet controller.
     replicas: 1
     template:
       metadata:
-        name: gridcapa-rabbitmq
+        name: gridsuite-rabbitmq
         labels:
-          app: gridcapa
-          component: gridcapa-rabbitmq
+          app: gridsuite
+          component: gridsuite-rabbitmq
         annotations:
           "cluster-autoscaler.kubernetes.io/safe-to-evict": "false"
       spec:
@@ -26,9 +26,9 @@
           - name: rabbitmq
             image: rabbitmq
             volumeMounts:
-              - name: gridcapa-rabbitmq-data
+              - name: gridsuite-rabbitmq-data
                 mountPath: "/var/lib/rabbitmq/mnesia"
-              - name: gridcapa-rabbitmq-configmap-volume
+              - name: gridsuite-rabbitmq-configmap-volume
                 subPath: rabbitmq.conf
                 mountPath: /etc/rabbitmq/rabbitmq.conf
             env:
@@ -92,8 +92,8 @@
               periodSeconds: 60
               timeoutSeconds: 10
         volumes:
-          - name: gridcapa-rabbitmq-configmap-volume
+          - name: gridsuite-rabbitmq-configmap-volume
             configMap:
-              name: gridcapa-rabbitmq-configmap
-          - name: gridcapa-rabbitmq-data
+              name: gridsuite-rabbitmq-configmap
+          - name: gridsuite-rabbitmq-data
             emptyDir: { }

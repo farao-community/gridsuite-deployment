@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gridcapa-postgresql
+  name: gridsuite-postgresql
   labels:
-    app: gridcapa
+    app: gridsuite
     component: postgresql
     app.kubernetes.io/component: postgresql
 spec:
   selector:
     matchLabels:
-      app: gridcapa
+      app: gridsuite
       component: postgresql
   template:
     metadata:
       labels:
-        app: gridcapa
+        app: gridsuite
         component: postgresql
       annotations:
         "cluster-autoscaler.kubernetes.io/safe-to-evict": "false"
@@ -65,4 +65,4 @@ spec:
             claimName: gridsuite-postgresql-storage
         - name: postgres-init
           configMap:
-            name: gridcapa-postgresql-configmap
+            name: gridsuite-postgresql-configmap

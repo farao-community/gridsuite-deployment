@@ -3,8 +3,8 @@ kind: Service
 metadata:
   name: rabbitmq
   labels:
-    app: gridcapa
-    component: gridcapa-rabbitmq
+    app: gridsuite
+    component: gridsuite-rabbitmq
 spec:
   type: ClusterIP
   ports:
@@ -18,5 +18,5 @@ spec:
       protocol: TCP
       port: 5672
   selector:
-    app: gridcapa
-    component: gridcapa-rabbitmq
+    app: gridsuite
+    component: gridsuite-rabbitmq

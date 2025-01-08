@@ -1,3 +1,15 @@
 - op: replace
   path: /spec/rules/0/host
   value: gridcapa-dev.farao-community.com
+- op: add
+  path: /metadata/annotations/nginx.ingress.kubernetes.io~1client-max-body-size
+  value: "200m"
+- op: add
+  path: /metadata/annotations/nginx.ingress.kubernetes.io~1proxy-body-size
+  value: "200m"
+- op: add
+  path: /metadata/annotations/nginx.ingress.kubernetes.io~1proxy-read-timeout
+  value: "3600"
+- op: add
+  path: /metadata/annotations/nginx.ingress.kubernetes.io~1proxy-send-timeout
+  value: "3600"
