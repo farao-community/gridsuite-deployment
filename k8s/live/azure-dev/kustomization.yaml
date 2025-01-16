@@ -1,12 +1,25 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - ../../overlays/azure
-
 components:
   - ../../components/gridsuite
   - ../../components/azure
+  - ../../overlays/main_versions
+
+resources:
+  - ../../overlays/azure
+  - postgresql-pv-claim.yaml
+  - postgresql-service.yaml
+  - postgresql-deployment.yaml
+  - postgresql-configmap.yaml
+#  Useful to manually import data via swagger
+  - geo-data-server-ingress.yaml
+  - odre-server-ingress.yaml
+  - network-modification-server-ingress.yaml
+  - rabbitmq-configmap.yaml
+  - rabbitmq-service.yaml
+  - rabbitmq-statefulset.yaml
+  - elasticsearch.yaml
 
 configMapGenerator:
   - name: gridapps-env-configmap
@@ -49,10 +62,23 @@ configMapGenerator:
     behavior: merge
     files:
       - config.yml=loadflow-server-config.yml
+  - name: elasticsearch.yml
+    files:
+      - elastic_config/elasticsearch.yml
+  - name: jvm.options
+    files:
+      - elastic_config/jvm.options
+  - name: log4j2.properties
+    files:
+      - elastic_config/log4j2.properties
+  - name: tmpdir
+    literals:
+      - tmpdir=/tmp
   - name: security-analysis-server-itools-configmap
     behavior: merge
     files:
       - config.yml=security-analysis-server-config.yml
+
 
 # Patch ingress host
 patches:
@@ -134,4 +160,21 @@ patches:
       kind: Ingress
       name: gridadmin-app-ingress
     path: patch_ingress.yaml
-
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: geo-data-server-ingress
+    path: patch_ingress.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: odre-server-ingress
+    path: patch_ingress.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: network-modification-server-ingress
+    path: patch_ingress.yaml

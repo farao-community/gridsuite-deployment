@@ -11,12 +11,10 @@ spec:
           - name: RABBITMQ_USER
             valueFrom:
               secretKeyRef:
-                name: rabbitmq-secrets
-                key: RABBITMQ_USER
-                optional: true
+                name: gridcapa-rabbitmq-credentials
+                key: rabbitmq-user
           - name: RABBITMQ_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: rabbitmq-secrets
-                key: RABBITMQ_PASSWORD
-                optional: true
+                name: gridcapa-rabbitmq-credentials
+                key: rabbitmq-password

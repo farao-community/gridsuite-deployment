@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: user-admin
+
+powsybl-ws:
+  database:
+    name: useradmin
+
+useradmin:
+  admins:
+    - d0f3436e-a73c-45ce-a8ee-219ae3727e09
+
+

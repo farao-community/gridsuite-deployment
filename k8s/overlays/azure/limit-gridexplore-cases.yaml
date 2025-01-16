@@ -5,4 +5,4 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     # To be able to import big networks
-    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+    nginx.ingress.kubernetes.io/proxy-body-size: 4096m

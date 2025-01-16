@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gridsuite-postgresql
+  labels:
+    app: gridsuite
+    component: postgresql
+spec:
+  type: ClusterIP
+  selector:
+    app: gridsuite
+    component: postgresql
+  ports:
+    - port: 5432

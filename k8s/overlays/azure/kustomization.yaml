@@ -11,5 +11,5 @@ configMapGenerator:
 
 patches:
   - path: limit-gridexplore-cases.yaml
-  - path: fluentd-containerd.yaml  # default fluentd parse is for docker, on azure we use containerd
+#  - path: fluentd-containerd.yaml  # default fluentd parse is for docker, on azure we use containerd
 

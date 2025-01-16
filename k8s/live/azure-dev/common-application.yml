@@ -3,20 +3,19 @@ spring:
     username: ${ELASTICSEARCH_USER:#{null}}
     password: ${ELASTICSEARCH_PASSWORD:#{null}}
     uris:
-      - http://elasticsearch:9201
-      - http://elasticsearch:9202
+      - http://elasticsearch:9200
   rabbitmq:
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
-    addresses: rabbitmq:5673,rabbitmq:5674,rabbitmq:5675
+    addresses: rabbitmq:5672
     address-shuffle-mode: random
 
 powsybl-ws:
-  environment: 
+  environment: dev_
 
   # Postgres database prefix
   database:
-    host: 10.0.0.5
+    host: gridsuite-postgresql
     databaseOrSchema:
       prefix: ${powsybl-ws.environment:}
 

@@ -3,5 +3,4 @@ kind: Kustomization
 
 resources:
   - ../gridsuite
-  - ../../resources/admin
-
+#  - ../../resources/admin

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gridsuite-postgresql-storage
+  labels:
+    app: gridsuite
+    component: postgresql
+spec:
+  storageClassName: azure-storage-class
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
