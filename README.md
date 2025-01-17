@@ -1,3 +1,25 @@
+# GridSuite for GridCapa
+Below is the readme of the original Gridsuite deployment repository found on this url :
+https://github.com/gridsuite/deployment
+
+The version you are currently on has been adapted to be deployed on GridCapa environments.
+Here are a few tips to ease its use.
+Please deploy GridSuite on **gridsuite** namespace, so as not to interfere with GridCapa DEV or TEST namespaces :
+
+- kubectl kustomize k8s/live/azure-dev/ --load-restrictor LoadRestrictionsNone | ssh -o "ProxyCommand=connect-proxy -H proxy-metier:8080 %h %p" farao@XX.XXX.XXX.XXX kubectl --kubeconfig=.kube/config apply -n gridsuite -f -
+
+
+## Data initialization
+
+GridSuite relies on geographical data, some of which are private. Opensource geographical data for the french network can
+be found and used on these links :
+- https://odre.opendatasoft.com/explore/dataset/postes-electriques-rte/export/?disjunctive.fonction&disjunctive.etat&disjunctive.tension
+- https://odre.opendatasoft.com/explore/dataset/lignes-souterraines-rte-nv/export/?disjunctive.etat&disjunctive.tension
+- https://odre.opendatasoft.com/explore/dataset/lignes-aeriennes-rte-nv/export/?disjunctive.etat&disjunctive.tension
+
+Once you've downloaded these files, you can upload them using the **ordre-server** swagger accessible on **/odre-server/swagger-ui/index.html**
+
+-----
 # GridSuite local deployment
 
 ## Local setup
