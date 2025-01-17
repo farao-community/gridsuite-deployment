@@ -9,12 +9,12 @@ metadata:
       # '/XXX/' and '/XXX' (trailing slash) (which would respectively become
       # '/' and '' inside the container but an empty path doesn't exist in http)
       # so always redirect '/XXX' to '/XXX/' in the client outside the container
-      rewrite ^/apps-metadata$ /apps-metadata/ permanent;
+      rewrite ^/gridsuite-apps-metadata$ /gridsuite-apps-metadata/ permanent;
 spec:
   rules:
   - http:
       paths:
-      - path: /apps-metadata(/|$)(.*)
+      - path: /gridsuite-apps-metadata(/|$)(.*)
         pathType: Prefix
         backend:
           service:
